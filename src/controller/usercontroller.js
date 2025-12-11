@@ -1,6 +1,7 @@
 
 import { responseHandler } from "../commonFunction/responsehandler.js"
 import { createUserService, deleteUserByIdService, getAllUsersService, getUsersbyIdService, updateUserService } from "../service/userService.js"
+import bcrypt from 'bcrypt'
 
 export const getAllUsersController = async(req , res , next)=>{
 
@@ -32,7 +33,15 @@ export const createUserController = async(req , res , next)=>{
 
     try {
     const {name , email , password } = req.body
-    const createUser = await createUserService(name , email , password)
+    console.log(name , email , password);
+    
+    if (!name || !email || !password) {
+        res.status(400)
+        throw new Error('Please fill all the fields')
+    }
+    // const salt = await bcrypt.genSalt(10)
+    const hashedPassword = await bcrypt.hash(password, 10)
+    const createUser = await createUserService(name , email , hashedPassword)
     responseHandler(res,200,'users created successfully',createUser)
     } catch (error) {
         next(error)
